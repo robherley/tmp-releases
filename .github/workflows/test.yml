@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run a one-line script
+      - name: Pretend to test
         run: |
           echo "pretend to run tests..."
           sleep 5
