@@ -63,12 +63,13 @@ jobs:
       - name: Make release
         uses: actions/github-script@v5
         with:
-          script: console.log(context)
-      # await github.rest.repos.createRelease({
-      #   owner: context.repo.owner,
-      #   repo: context.repo.repo,
-      #   tag_name,
-      # });
+          script: |
+            const tag_name = context.ref.replace("refs/tags/", "")
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name
+            });
       # - name: Upload release assets
       #   uses: actions/github-script@v5
       #   with:
