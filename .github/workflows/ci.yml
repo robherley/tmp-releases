@@ -46,10 +46,12 @@ jobs:
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
+      - name: List
+        run: ls -la
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
-          name: my-artifact
+          name: $OUPUT_BINARY
           path: $OUTPUT_BINARY
           if-no-files-found: error
           retention-days: 1
