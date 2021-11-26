@@ -1,0 +1,14 @@
+name: Test
+
+on: [push, workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run a one-line script
+        run: |
+          echo "pretend to run tests..."
+          sleep 5
+          echo "done!"
