@@ -75,18 +75,6 @@ jobs:
     steps:
       - name: Download binaries
         uses: actions/download-artifact@v2
-      - name: Make release
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const tag_name = context.ref.replace("refs/tags/", "")
-            const release = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name
-            })
-
-            core.exportVariable('RELEASE_ID', release.data.id)
       - name: Upload release assets
         uses: actions/github-script@v5
         with:
