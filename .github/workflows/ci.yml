@@ -85,10 +85,9 @@ jobs:
             const fs = require('fs');
             const { readFile } = fs.promises;
 
-            const globber = await glob.create('*.tar.gz')
-            for await (const file of globber.globGenerator()) {
-              console.log(file)
-            }
+            const globber = await glob.create('**/hello_*.tar.gz');
+            const files = await globber.glob();
+            console.log(files);
 
           # await rest.repos.uploadReleaseAsset({
           #     owner: context.repo.owner,
