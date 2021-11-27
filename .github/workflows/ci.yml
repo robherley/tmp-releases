@@ -73,7 +73,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name
-            });
+            })
 
             core.exportVariable('RELEASE_ID', release.data.id)
       - name: Print files
@@ -82,17 +82,24 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const fs = require('fs');
-            const { readFile } = fs.promises;
+            const fs = require('fs')
+            const { readFile } = fs.promises
 
-            const globber = await glob.create('**/hello_*.tar.gz');
-            const files = await globber.glob();
-            console.log(files);
+            const globber = await glob.create('**/hello_*.tar.gz')
+            const paths = await globber.glob()
 
-          # await rest.repos.uploadReleaseAsset({
-          #     owner: context.repo.owner,
-          #     repo: context.repo.repo,
-          #     release_id: release_id,
-          #     name: name,
-          #     data: data,
-          #   })
+            const release_id = +env['RELEASE_ID']
+
+            const files = paths.map(path => readFile(path))
+
+            const rawfiles = await Promise.all(files)
+
+            const uploads = rawfiles.map((data, i) => github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id,
+              name: paths[i].split('/').reverse()[0],
+              data
+            }))
+
+            await Promise.all(uploads)
