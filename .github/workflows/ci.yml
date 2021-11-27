@@ -65,26 +65,29 @@ jobs:
         with:
           script: |
             const tag_name = context.ref.replace("refs/tags/", "")
-            await github.rest.repos.createRelease({
+            const release = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name
             });
-      # - name: Upload release assets
-      #   uses: actions/github-script@v5
-      #   with:
-      #     script: |
-      #       const fs = require('fs');
 
-      #       const globber = await glob.create('hello*')
-      #       for await (const file of globber.globGenerator()) {
-      #         console.log(file)
-      #       }
+            core.exportVariable('RELEASE_ID', release.data.id)
+      - name: Upload release assets
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+            const { readFile } = fs.promises;
 
-      #       await rest.repos.uploadReleaseAsset({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         release_id: release_id,
-      #         name: name,
-      #         data: data,
-      #       })
+            const globber = await glob.create('hello*')
+            for await (const file of globber.globGenerator()) {
+              console.log(file)
+            }
+
+          # await rest.repos.uploadReleaseAsset({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     release_id: release_id,
+          #     name: name,
+          #     data: data,
+          #   })
