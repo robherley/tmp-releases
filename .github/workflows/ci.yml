@@ -8,6 +8,9 @@ on: [push, workflow_dispatch, pull_request]
 # release if tags [needs: test, lint, build]
 # deploy [needs: release]
 
+env:
+  BINARY_NAME: hello
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,7 +26,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
   build:
@@ -33,7 +37,7 @@ jobs:
         os: ['linux', 'darwin', 'windows']
         arch: ['amd64', 'arm64']
     env:
-      OUTPUT_BINARY: hello_${{ matrix.os }}_${{ matrix.arch }}
+      OUTPUT_NAME: ${{ env.BINARY_NAME }}_${{ matrix.os }}_${{ matrix.arch }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -42,19 +46,19 @@ jobs:
         with:
           go-version: 1.17
       - name: Build ${{ matrix.os }}/${{ matrix.arch }}
-        run: script/build -o $OUTPUT_BINARY
+        run: script/build -o $OUTPUT_NAME
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
       - name: Set exec perms and add to gzip tarball
         run: |
-          chmod +x ${{ env.OUTPUT_BINARY }}
-          tar cvzf ${{ env.OUTPUT_BINARY }}.tar.gz ${{ env.OUTPUT_BINARY }}
+          chmod +x ${{ env.OUTPUT_NAME }}
+          tar cvzf ${{ env.OUTPUT_NAME }}.tar.gz ${{ env.OUTPUT_NAME }}
       - name: Upload tarball
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.OUTPUT_BINARY }}
-          path: ${{ env.OUTPUT_BINARY }}.tar.gz
+          name: ${{ env.OUTPUT_NAME }}
+          path: ${{ env.OUTPUT_NAME }}.tar.gz
           if-no-files-found: error
           retention-days: 1
   release:
@@ -76,8 +80,6 @@ jobs:
             })
 
             core.exportVariable('RELEASE_ID', release.data.id)
-      - name: Print files
-        run: ls -laRh
       - name: Upload release assets
         uses: actions/github-script@v5
         with:
@@ -85,9 +87,7 @@ jobs:
             const fs = require('fs')
             const { readFile } = fs.promises
 
-            const release_id = +process.env['RELEASE_ID']
-
-            const globber = await glob.create('**/hello_*.tar.gz')
+            const globber = await glob.create(`**/${process.env['BINARY_NAME']}_*.tar.gz`)
             const paths = await globber.glob()
 
             const files = paths.map(path => readFile(path))
@@ -96,7 +96,7 @@ jobs:
             const uploads = rawfiles.map((data, i) => github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id,
+              release_id: +process.env['RELEASE_ID'],
               name: paths[i].split('/').reverse()[0],
               data
             }))
