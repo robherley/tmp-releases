@@ -85,13 +85,12 @@ jobs:
             const fs = require('fs')
             const { readFile } = fs.promises
 
+            const release_id = +process.env['RELEASE_ID']
+
             const globber = await glob.create('**/hello_*.tar.gz')
             const paths = await globber.glob()
 
-            const release_id = +env['RELEASE_ID']
-
             const files = paths.map(path => readFile(path))
-
             const rawfiles = await Promise.all(files)
 
             const uploads = rawfiles.map((data, i) => github.rest.repos.uploadReleaseAsset({
