@@ -72,6 +72,8 @@ jobs:
             });
 
             core.exportVariable('RELEASE_ID', release.data.id)
+      - name: Print files
+        run: ls -laRh
       - name: Upload release assets
         uses: actions/github-script@v5
         with:
