@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.OUTPUT_BINARY }}
-          path: ${{ env.OUTPUT_BINARY }}
+          path: ${{ env.OUTPUT_BINARY }}.tar.gz
           if-no-files-found: error
           retention-days: 1
   release:
